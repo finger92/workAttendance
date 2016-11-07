@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -233,6 +234,24 @@ public class ExcelUtils {
         return str;  
     }
 	
+	private static boolean testYesterdayExtraWork(List<PersonBean> pbList, String date){
+		Calendar c = Calendar.getInstance();
+		try {
+			c.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(date));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		c.add(Calendar.DAY_OF_MONTH, -1);  
+        String yesDay = new SimpleDateFormat("yyyy-MM-dd").format(c.getTime());
+		for(PersonBean pb : pbList){
+			if(pb.attendDate.equals(yesDay)&&pb.getFourOut()!=null){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static void main(String[] args) {
 		Date shangbanTime = null;
 		Date xiabanTime = null;
@@ -327,25 +346,25 @@ public class ExcelUtils {
 				String addString = "";
 				Boolean weishua=false,chidao=false,zaotui=false;
 				if(tempPb.getSecondIn()==null){
-					weishua=true;
-					tempPab.weishua++;
-					addString="上午未刷，";
+					if(!testYesterdayExtraWork(pList, tempPb.getAttendDate())){
+						weishua=true;
+						tempPab.weishua++;
+						addString="上午未刷，";
+					}
 				}
-				if(tempPb.getFourIn()==null
-						&&tempPb.getThirdOut()==null){
-					weishua=true;
-					tempPab.weishua++;
-					addString+="中午未刷，";
-				}
+//				if(tempPb.getFourIn()==null
+//						&&tempPb.getThirdOut()==null){
+//					weishua=true;
+//					tempPab.weishua++;
+//					addString+="中午未刷，";
+//				}
 				if(tempPb.getSecondOut()==null){
 					weishua=true;
 					tempPab.weishua++;
 					addString+="下午未刷，";
 				}
 				if(tempPb.getSecondIn()==null
-						&&tempPb.getSecondOut()==null
-						&&tempPb.getFourIn()==null
-						&&tempPb.getFourOut()==null){
+						&&tempPb.getSecondOut()==null){
 					weishua=true;
 					addString = "全天未刷，";
 				}
@@ -358,7 +377,7 @@ public class ExcelUtils {
 					addString+="上午迟到"+(hour*60+min)+"分钟，";
 				}
 				if(tempPb.getSecondOut()!=null && tempPb.getSecondOut().getTime()<xiabanTime.getTime()){
-					long chidaoTime = xiabanTime.getTime()-tempPb.getFourOut().getTime();  
+					long chidaoTime = xiabanTime.getTime()-tempPb.getSecondOut().getTime();  
 					long day=chidaoTime/(24*60*60*1000);
 					long hour=(chidaoTime/(60*60*1000)-day*24);
 					long min=((chidaoTime/(60*1000))-day*24*60-hour*60);
