@@ -11,6 +11,7 @@ public class PersonAttendBean {
 	int mqDays;
 //	int mqWeeks;
 	String hege;
+	String zhiban;
 
 	public PersonAttendBean(){
 		this.weishua = 0;
@@ -22,6 +23,7 @@ public class PersonAttendBean {
 		this.kqkk="";
 		this.kqyc="";
 		this.hege="";
+		this.zhiban="";
 	}
 	public PersonAttendBean(String name){
 		this.name = name;
@@ -34,6 +36,7 @@ public class PersonAttendBean {
 		this.kqkk="";
 		this.kqyc="";
 		this.hege="";
+		this.zhiban="";
 	}
 	public String getName() {
 		return name;
@@ -95,4 +98,11 @@ public class PersonAttendBean {
 //	public void setMqWeeks(int mqWeeks) {
 //		this.mqWeeks = mqWeeks;
 //	}
+	public String getZhiban() {
+		return zhiban;
+	}
+	public void setZhiban(String zhiban) {
+		this.zhiban = zhiban;
+	}
+	
 }

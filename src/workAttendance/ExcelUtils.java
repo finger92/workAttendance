@@ -234,7 +234,7 @@ public class ExcelUtils {
         return str;  
     }
 	
-	private static boolean testYesterdayExtraWork(List<PersonBean> pbList, String date){
+	private static boolean testYesterdayExtraWork(List<PersonBean> pbList, PersonBean pbean, String date){
 		Calendar c = Calendar.getInstance();
 		try {
 			c.setTime(new SimpleDateFormat("yyyy-MM-dd").parse(date));
@@ -245,7 +245,7 @@ public class ExcelUtils {
 		c.add(Calendar.DAY_OF_MONTH, -1);  
         String yesDay = new SimpleDateFormat("yyyy-MM-dd").format(c.getTime());
 		for(PersonBean pb : pbList){
-			if(pb.attendDate.equals(yesDay)&&pb.getFourOut()!=null){
+			if(pb.getName().equals(pbean.getName())&&pb.attendDate.equals(yesDay)&&pb.getFourOut()!=null){
 				return true;
 			}
 		}
@@ -346,18 +346,12 @@ public class ExcelUtils {
 				String addString = "";
 				Boolean weishua=false,chidao=false,zaotui=false;
 				if(tempPb.getSecondIn()==null){
-					if(!testYesterdayExtraWork(pList, tempPb.getAttendDate())){
+					if(!testYesterdayExtraWork(pList, tempPb, tempPb.getAttendDate())){
 						weishua=true;
 						tempPab.weishua++;
 						addString="上午未刷，";
 					}
 				}
-//				if(tempPb.getFourIn()==null
-//						&&tempPb.getThirdOut()==null){
-//					weishua=true;
-//					tempPab.weishua++;
-//					addString+="中午未刷，";
-//				}
 				if(tempPb.getSecondOut()==null){
 					weishua=true;
 					tempPab.weishua++;
@@ -386,15 +380,19 @@ public class ExcelUtils {
 				}
 				if(chidao)tempPab.chidao++;
 				if(zaotui)tempPab.zaotui++;
-				//没有异常记录记满勤一天,一周清一次
+				// 没有异常记录记满勤一天,一周清一次
 				if(!weishua&&!chidao&&!zaotui){
 					tempPab.mqDays++;
 				}
-				
-				if(!addString.equals("")){
-					String formatDate = Integer.parseInt(tempPb.getAttendDate().split("-")[1])
-							+"."+Integer.parseInt(tempPb.getAttendDate().split("-")[2]);
+				String formatDate = Integer.parseInt(tempPb.getAttendDate().split("-")[1])
+						+"."+Integer.parseInt(tempPb.getAttendDate().split("-")[2]);
+				if(!addString.equals("")){	
 					tempPab.kqyc+=formatDate+addString;
+				}
+				
+				// 添加值班记录
+				if(tempPb.getFourOut()!=null){
+					tempPab.zhiban+=formatDate+"值班一次，";
 				}
 			}
 			
@@ -418,7 +416,7 @@ public class ExcelUtils {
 
 			// 输出结果到excel
 			ExportExcel<PersonAttendBean> ex = new ExportExcel<PersonAttendBean>();
-			String[] headers = { "姓名", "职务", "考勤扣款类别", "考勤异常情况","未刷","迟到","早退","满勤天数","合格情况"};
+			String[] headers = { "姓名", "职务", "考勤扣款类别", "考勤异常情况","未刷","迟到","早退","满勤天数","合格情况","值班情况"};
 			try {
 				System.out.println("正在导出缺勤情况统计表...");
 				OutputStream out = new FileOutputStream("output.xls");
